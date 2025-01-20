@@ -55,12 +55,14 @@ const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      return res.status(401).json({ error: '无效的认证令牌' });
-    }
+    console.log('Token:', token);
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('Decoded token:', decoded);
 
     const user = await User.findById(decoded.id);
+    console.log('Found user:', user);
+
     if (!user) {
       return res.status(401).json({ error: '用户不存在' });
     }
@@ -69,7 +71,7 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Authentication error:', err);
-    res.status(401).json({ error: '认证失败' });
+    res.status(401).json({ error: '无效的认证令牌' });
   }
 };
 
