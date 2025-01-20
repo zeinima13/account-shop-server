@@ -37,74 +37,53 @@ mongoose.connect(process.env.MONGODB_URI, {
     console.error('MongoDB URI:', process.env.MONGODB_URI);
   });
 
-// 根路由
+// API文档路由
 app.get('/', (req, res) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  const html = `
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`
     <!DOCTYPE html>
-    <html lang="zh-CN">
-      <head>
-        <title>账户商店 API</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body { 
-            font-family: system-ui, -apple-system, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            line-height: 1.6;
-            background: #f9f9f9;
-          }
-          h1 { 
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
-          }
-          .endpoint {
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          }
-          .endpoint h3 {
-            margin: 0 0 1rem 0;
-            color: #2563eb;
-          }
-          .method {
-            background: #2563eb;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            margin-right: 0.5rem;
-          }
-          .path {
-            color: #333;
-            font-family: monospace;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>账户商店 API 文档</h1>
-        <p>API 版本：v1.0</p>
-        <div class="endpoint">
-          <h3><span class="method">GET</span><span class="path">/api</span></h3>
-          <p>检查 API 状态和环境变量配置</p>
-        </div>
-        <div class="endpoint">
-          <h3><span class="method">GET</span><span class="path">/api/products</span></h3>
-          <p>获取商品列表</p>
-        </div>
-        <div class="endpoint">
-          <h3><span class="method">POST</span><span class="path">/api/admin/register</span></h3>
-          <p>管理员注册（需要用户名和密码）</p>
-        </div>
-      </body>
+    <html>
+    <head>
+      <title>账户商店 API 文档</title>
+      <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .method { color: #fff; padding: 5px 10px; border-radius: 3px; font-size: 12px; }
+        .get { background-color: #61affe; }
+        .post { background-color: #49cc90; }
+        .delete { background-color: #f93e3e; }
+      </style>
+    </head>
+    <body>
+      <h1>账户商店 API 文档</h1>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/products</code>
+        <p>获取所有产品列表</p>
+      </div>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/api/products</code>
+        <p>创建新产品</p>
+      </div>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/orders</code>
+        <p>获取所有订单</p>
+      </div>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/api/orders</code>
+        <p>创建新订单</p>
+      </div>
+    </body>
     </html>
-  `;
-  res.send(html);
+  `);
 });
 
 app.get('/api', (req, res) => {
