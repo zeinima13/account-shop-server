@@ -43,32 +43,21 @@ app.use((err, req, res, next) => {
 
 // MongoDB 连接
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('MongoDB connected successfully');
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err);
-    console.error('MongoDB URI:', process.env.MONGODB_URI);
-  });
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // 导出 handler
 const handler = serverless(app);
 
-exports.handler = async function(event, context) {
+module.exports.handler = async (event, context) => {
+  // 打印请求信息用于调试
+  console.log('Request event:', event);
+  
   try {
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE'
-      },
-      body: JSON.stringify({
-        message: '账户商店 API 正在运行'
-      })
-    };
+    const result = await handler(event, context);
+    return result;
   } catch (error) {
+    console.error('Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: '服务器内部错误' })
