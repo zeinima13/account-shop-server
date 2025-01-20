@@ -9,18 +9,16 @@ const Order = require('../../models/Order');
 const { generateToken } = require('../../utils/auth');
 
 const app = express();
+const router = express.Router();
 
 // 中间件
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-// 设置 MongoDB 连接
+// 连接 MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://zeinima13:zeinima13@cluster0.xtxwqn1.mongodb.net/account-shop?retryWrites=true&w=majority')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
-
-// API 路由
-const router = express.Router();
 
 // API 状态
 router.get('/', (req, res) => {
@@ -76,7 +74,12 @@ router.post('/auth/register', async (req, res) => {
       return res.status(400).json({ error: '用户名已存在' });
     }
 
-    const user = new User({ username, password });
+    const user = new User({
+      username,
+      password,
+      role: 'user'
+    });
+
     await user.save();
 
     const token = generateToken(user);
@@ -89,7 +92,7 @@ router.post('/auth/register', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('Register error:', err);
+    console.error('Registration error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -104,7 +107,12 @@ router.post('/auth/login', async (req, res) => {
     }
 
     const user = await User.findOne({ username });
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user) {
+      return res.status(401).json({ error: '用户名或密码错误' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
@@ -156,41 +164,6 @@ router.post('/auth/create-admin', async (req, res) => {
     });
   } catch (err) {
     console.error('Create admin error:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 更新用户角色
-router.put('/auth/update-role', async (req, res) => {
-  try {
-    const { username, role } = req.body;
-    
-    if (!username || !role) {
-      return res.status(400).json({ error: '缺少必要参数' });
-    }
-
-    if (!['admin', 'user'].includes(role)) {
-      return res.status(400).json({ error: '无效的角色' });
-    }
-
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ error: '用户不存在' });
-    }
-
-    user.role = role;
-    await user.save();
-
-    res.json({
-      message: '用户角色已更新',
-      user: {
-        id: user._id,
-        username: user.username,
-        role: user.role
-      }
-    });
-  } catch (err) {
-    console.error('Update role error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -295,60 +268,50 @@ router.delete('/products/:id', authenticate, requireAdmin, async (req, res) => {
 // 创建订单
 router.post('/orders', authenticate, async (req, res) => {
   try {
-    const user = req.user;
     const { productId } = req.body;
 
     if (!productId) {
-      return res.status(400).json({ error: '请提供商品ID' });
+      return res.status(400).json({ error: '缺少产品ID' });
     }
 
     const product = await Product.findById(productId);
-    if (!product || product.status !== 'available') {
-      return res.status(400).json({ error: '商品不可用' });
+    if (!product) {
+      return res.status(404).json({ error: '产品不存在' });
+    }
+
+    if (product.stock <= 0) {
+      return res.status(400).json({ error: '产品库存不足' });
     }
 
     const order = new Order({
-      user: user.id,
+      user: req.user.id,
       product: productId,
-      price: product.price
+      price: product.price,
+      status: 'pending'
     });
 
-    product.status = 'reserved';
-    
-    await Promise.all([
-      order.save(),
-      product.save()
-    ]);
+    product.stock--;
+    await Promise.all([order.save(), product.save()]);
 
-    res.json({ order });
+    res.status(201).json(order);
   } catch (err) {
     console.error('Create order error:', err);
-    res.status(401).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
 // 获取用户订单
 router.get('/orders', authenticate, async (req, res) => {
   try {
-    const user = req.user;
-    const orders = await Order.find({ user: user.id })
+    const orders = await Order.find({ user: req.user.id })
       .populate('product')
       .sort('-createdAt');
-    res.json({ orders });
+    res.json(orders);
   } catch (err) {
     console.error('Get orders error:', err);
-    res.status(401).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// 使用路由
 app.use('/.netlify/functions/api', router);
-
-// 错误处理中间件
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: '服务器内部错误' });
-});
-
-// 导出 handler
 module.exports.handler = serverless(app);
