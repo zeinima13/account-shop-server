@@ -31,14 +31,23 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// 创建管理员（仅在开发环境使用）
-router.post('/create', async (req, res) => {
+// 创建管理员账户
+router.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
+    
+    // 检查是否已存在管理员
+    const existingAdmin = await Admin.findOne({ username });
+    if (existingAdmin) {
+      return res.status(400).json({ message: '用户名已存在' });
+    }
+
+    // 创建新管理员
     const admin = new Admin({ username, password });
     await admin.save();
     res.status(201).json({ message: '管理员创建成功' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: '服务器错误' });
   }
 });
