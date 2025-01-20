@@ -90,20 +90,10 @@ router.post('/auth/login', async (req, res) => {
 // 创建管理员账户
 router.post('/auth/create-admin', async (req, res) => {
   try {
-    const { username, password, secretKey } = req.body;
+    const { username, password } = req.body;
     
-    console.log('Creating admin account:', { username, secretKey });
-    console.log('Environment:', { 
-      ADMIN_SECRET_KEY: process.env.ADMIN_SECRET_KEY,
-      NODE_ENV: process.env.NODE_ENV
-    });
-    
-    if (!username || !password || !secretKey) {
-      return res.status(400).json({ error: '缺少必要参数' });
-    }
-
-    if (secretKey !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(401).json({ error: `无效的密钥: ${secretKey} !== ${process.env.ADMIN_SECRET_KEY}` });
+    if (!username || !password) {
+      return res.status(400).json({ error: '请提供用户名和密码' });
     }
 
     const existingUser = await User.findOne({ username });
@@ -137,16 +127,10 @@ router.post('/auth/create-admin', async (req, res) => {
 // 更新用户角色
 router.put('/auth/update-role', async (req, res) => {
   try {
-    const { username, role, secretKey } = req.body;
+    const { username, role } = req.body;
     
-    console.log('Updating user role:', { username, role, secretKey });
-    
-    if (!username || !role || !secretKey) {
+    if (!username || !role) {
       return res.status(400).json({ error: '缺少必要参数' });
-    }
-
-    if (secretKey !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(401).json({ error: '无效的密钥' });
     }
 
     if (!['admin', 'user'].includes(role)) {
