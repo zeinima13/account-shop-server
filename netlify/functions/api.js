@@ -135,6 +135,47 @@ exports.handler = async function(event, context) {
       }
     }
 
+    // 创建管理员账户
+    if (method === 'POST' && path === '/auth/create-admin') {
+      const { username, password, secretKey } = body;
+      
+      if (!username || !password || !secretKey) {
+        return error('缺少必要参数', 400);
+      }
+
+      if (secretKey !== process.env.ADMIN_SECRET_KEY) {
+        return error('无效的密钥', 401);
+      }
+
+      try {
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+          return error('用户名已存在', 400);
+        }
+
+        const user = new User({
+          username,
+          password,
+          role: 'admin'
+        });
+
+        await user.save();
+
+        const token = generateToken(user);
+        return success({
+          token,
+          user: {
+            id: user._id,
+            username: user.username,
+            role: user.role
+          }
+        });
+      } catch (err) {
+        console.error('Create admin error:', err);
+        return error(err.message);
+      }
+    }
+
     // 获取商品列表
     if (method === 'GET' && path === '/products') {
       try {
