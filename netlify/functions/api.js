@@ -19,27 +19,6 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// 路由处理
-const router = express.Router();
-
-router.get('/', (req, res) => {
-  res.json({ message: '账户商店 API 正在运行' });
-});
-
-router.post('/auth/login', (req, res) => {
-  res.json({ message: '登录功能即将上线' });
-});
-
-router.get('/products', (req, res) => {
-  res.json({ message: '商品列表功能即将上线' });
-});
-
-router.post('/orders', (req, res) => {
-  res.json({ message: '订单创建功能即将上线' });
-});
-
-app.use('/', router);
-
 // 错误处理中间件
 app.use((err, req, res, next) => {
   console.error(err);
@@ -49,17 +28,64 @@ app.use((err, req, res, next) => {
 // 导出 handler
 const handler = serverless(app);
 
-module.exports.handler = async (event, context) => {
-  // 打印请求信息用于调试
-  console.log('Request event:', event);
-  
+exports.handler = async function(event, context) {
+  // 设置 CORS 头
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+    'Content-Type': 'application/json'
+  };
+
   try {
-    const result = await handler(event, context);
-    return result;
+    const path = event.path.replace('/.netlify/functions/api', '');
+    const method = event.httpMethod;
+
+    // 路由处理
+    if (method === 'GET' && (path === '' || path === '/')) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: '账户商店 API 正在运行' })
+      };
+    }
+
+    if (method === 'POST' && path === '/auth/login') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: '登录功能即将上线' })
+      };
+    }
+
+    if (method === 'GET' && path === '/products') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: '商品列表功能即将上线' })
+      };
+    }
+
+    if (method === 'POST' && path === '/orders') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ message: '订单创建功能即将上线' })
+      };
+    }
+
+    // 404 处理
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ error: '找不到请求的资源' })
+    };
+
   } catch (error) {
     console.error('Error:', error);
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: '服务器内部错误' })
     };
   }
