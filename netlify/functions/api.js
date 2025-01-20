@@ -182,6 +182,47 @@ exports.handler = async function(event, context) {
       }
     }
 
+    // 更新用户角色
+    if (method === 'PUT' && path === '/auth/update-role') {
+      const { username, role, secretKey } = body;
+      
+      console.log('Updating user role:', { username, role, secretKey });
+      
+      if (!username || !role || !secretKey) {
+        return error('缺少必要参数', 400);
+      }
+
+      if (secretKey !== process.env.ADMIN_SECRET_KEY) {
+        return error('无效的密钥', 401);
+      }
+
+      if (!['admin', 'user'].includes(role)) {
+        return error('无效的角色', 400);
+      }
+
+      try {
+        const user = await User.findOne({ username });
+        if (!user) {
+          return error('用户不存在', 404);
+        }
+
+        user.role = role;
+        await user.save();
+
+        return success({
+          message: '用户角色已更新',
+          user: {
+            id: user._id,
+            username: user.username,
+            role: user.role
+          }
+        });
+      } catch (err) {
+        console.error('Update role error:', err);
+        return error(err.message);
+      }
+    }
+
     // 获取商品列表
     if (method === 'GET' && path === '/products') {
       try {
