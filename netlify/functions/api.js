@@ -192,20 +192,17 @@ router.post('/auth/create-admin', async (req, res) => {
 // 创建产品（需要管理员权限）
 router.post('/products', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { title, description, price, stock, type, status } = req.body;
+    const { name, price, account, type } = req.body;
     
-    if (!title || !description || !price || !stock || !type || !status) {
+    if (!name || !price || !account || !type) {
       return res.status(400).json({ error: '缺少必要参数' });
     }
 
     const product = new Product({
-      title,
-      description,
+      name,
       price,
-      stock,
-      type,
-      status,
-      createdBy: req.user._id
+      account,
+      type
     });
 
     await product.save();
@@ -225,7 +222,7 @@ router.get('/products', async (req, res) => {
     if (type) filter.type = type;
     if (status) filter.status = status;
 
-    const products = await Product.find(filter);
+    const products = await Product.find(filter).sort('-createdAt');
     res.json(products);
   } catch (err) {
     console.error('Get products error:', err);
@@ -250,17 +247,16 @@ router.get('/products/:id', async (req, res) => {
 // 更新产品（需要管理员权限）
 router.put('/products/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { title, description, price, stock, type, status } = req.body;
+    const { name, price, account, type, status } = req.body;
     const product = await Product.findById(req.params.id);
     
     if (!product) {
       return res.status(404).json({ error: '产品不存在' });
     }
 
-    if (title) product.title = title;
-    if (description) product.description = description;
+    if (name) product.name = name;
     if (price) product.price = price;
-    if (stock) product.stock = stock;
+    if (account) product.account = account;
     if (type) product.type = type;
     if (status) product.status = status;
 
@@ -300,7 +296,7 @@ router.post('/orders', authenticate, async (req, res) => {
       return res.status(404).json({ error: '产品不存在' });
     }
 
-    if (product.stock <= 0) {
+    if (product.account <= 0) {
       return res.status(400).json({ error: '产品库存不足' });
     }
 
@@ -311,7 +307,7 @@ router.post('/orders', authenticate, async (req, res) => {
       status: 'pending'
     });
 
-    product.stock--;
+    product.account--;
     await Promise.all([order.save(), product.save()]);
 
     res.status(201).json(order);

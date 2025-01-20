@@ -1,34 +1,27 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
+  name: {
     type: String,
     required: true
   },
   price: {
     type: Number,
-    required: true,
-    min: 0
+    required: true
   },
-  stock: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0
+  account: {
+    type: String,
+    required: true
   },
   type: {
     type: String,
     required: true,
-    enum: ['game', 'software', 'account']
+    enum: ['微博', 'QQ', '游戏', '其他']
   },
   status: {
     type: String,
-    enum: ['available', 'sold', 'reserved'],
-    default: 'available'
+    default: 'active',
+    enum: ['active', 'sold']
   },
   createdAt: {
     type: Date,
