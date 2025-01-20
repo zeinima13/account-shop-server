@@ -39,16 +39,10 @@ const authenticate = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     console.log('Token:', token);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-jwt-secret-key');
+    const decoded = jwt.verify(token, 'your-jwt-secret-key');
     console.log('Decoded token:', decoded);
     
-    const user = await User.findById(decoded.id);
-    console.log('Found user:', user);
-    if (!user) {
-      return res.status(401).json({ error: '用户不存在' });
-    }
-
-    req.user = user;
+    req.user = decoded;
     next();
   } catch (err) {
     console.error('Authentication error:', err);
