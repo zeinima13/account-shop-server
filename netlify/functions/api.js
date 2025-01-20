@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // 设置 MongoDB 连接
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://zeinima13:zeinima13@cluster0.xtxwqn1.mongodb.net/account-shop?retryWrites=true&w=majority')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -24,21 +24,26 @@ const router = express.Router();
 
 // API 状态
 router.get('/', (req, res) => {
+  console.log('API is running');
   res.json({ message: '账户商店 API 正在运行' });
 });
 
 // 认证中间件
 const authenticate = async (req, res, next) => {
   try {
+    console.log('Auth headers:', req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: '未提供认证令牌' });
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('Token:', token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-jwt-secret-key');
+    console.log('Decoded token:', decoded);
     
     const user = await User.findById(decoded.id);
+    console.log('Found user:', user);
     if (!user) {
       return res.status(401).json({ error: '用户不存在' });
     }
