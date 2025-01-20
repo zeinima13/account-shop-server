@@ -54,15 +54,21 @@ mongoose.connect(process.env.MONGODB_URI)
 // 导出 handler
 const handler = serverless(app);
 
-module.exports.handler = async (event, context) => {
-  // 打印请求信息用于调试
-  console.log('Request event:', event);
-  
+exports.handler = async function(event, context) {
   try {
-    const result = await handler(event, context);
-    return result;
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE'
+      },
+      body: JSON.stringify({
+        message: '账户商店 API 正在运行'
+      })
+    };
   } catch (error) {
-    console.error('Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: '服务器内部错误' })
