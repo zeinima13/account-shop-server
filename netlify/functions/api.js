@@ -42,13 +42,11 @@ const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, 'your-jwt-secret-key');
     console.log('Decoded token:', decoded);
     
-    const user = await User.findById(decoded.id);
-    console.log('Found user:', user);
-    if (!user) {
-      return res.status(401).json({ error: '用户不存在' });
-    }
-
-    req.user = user;
+    req.user = {
+      id: decoded.id,
+      username: decoded.username,
+      role: decoded.role
+    };
     next();
   } catch (err) {
     console.error('Authentication error:', err);
@@ -212,7 +210,8 @@ router.post('/products', authenticate, requireAdmin, async (req, res) => {
       price,
       stock,
       type,
-      status
+      status,
+      createdBy: req.user.id
     });
 
     await product.save();
