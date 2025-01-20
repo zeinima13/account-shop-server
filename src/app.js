@@ -37,63 +37,27 @@ mongoose.connect(process.env.MONGODB_URI, {
     console.error('MongoDB URI:', process.env.MONGODB_URI);
   });
 
-// API文档路由
+// 根路由
 app.get('/', (req, res) => {
-  res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(`
     <!DOCTYPE html>
     <html>
-    <head>
-      <title>账户商店 API 文档</title>
-      <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #333; }
-        .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .method { color: #fff; padding: 5px 10px; border-radius: 3px; font-size: 12px; }
-        .get { background-color: #61affe; }
-        .post { background-color: #49cc90; }
-        .delete { background-color: #f93e3e; }
-      </style>
-    </head>
-    <body>
-      <h1>账户商店 API 文档</h1>
-      
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/products</code>
-        <p>获取所有产品列表</p>
-      </div>
-
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/products</code>
-        <p>创建新产品</p>
-      </div>
-
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/orders</code>
-        <p>获取所有订单</p>
-      </div>
-
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/orders</code>
-        <p>创建新订单</p>
-      </div>
-    </body>
+      <head>
+        <meta charset="utf-8">
+        <title>账户商店 API</title>
+      </head>
+      <body>
+        <h1>账户商店 API 文档</h1>
+        <p>欢迎使用账户商店 API</p>
+      </body>
     </html>
   `);
 });
 
+// API 状态路由
 app.get('/api', (req, res) => {
-  res.json({ 
-    message: '账户商店 API v1.0 正在运行',
-    env: {
-      mongodbUri: process.env.MONGODB_URI ? 'Set' : 'Not set',
-      nodeEnv: process.env.NODE_ENV
-    }
-  });
+  res.json({ message: '账户商店 API 正在运行' });
 });
 
 // API 路由
