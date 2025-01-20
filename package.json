@@ -1,7 +1,10 @@
 {
-  "name": "server",
+  "name": "account-shop-server",
   "version": "1.0.0",
   "main": "src/app.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
@@ -10,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Account Shop Server",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
