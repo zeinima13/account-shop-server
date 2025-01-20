@@ -139,12 +139,18 @@ exports.handler = async function(event, context) {
     if (method === 'POST' && path === '/auth/create-admin') {
       const { username, password, secretKey } = body;
       
+      console.log('Creating admin account:', { username, secretKey });
+      console.log('Environment:', { 
+        ADMIN_SECRET_KEY: process.env.ADMIN_SECRET_KEY,
+        NODE_ENV: process.env.NODE_ENV
+      });
+      
       if (!username || !password || !secretKey) {
         return error('缺少必要参数', 400);
       }
 
       if (secretKey !== process.env.ADMIN_SECRET_KEY) {
-        return error('无效的密钥', 401);
+        return error(`无效的密钥: ${secretKey} !== ${process.env.ADMIN_SECRET_KEY}`, 401);
       }
 
       try {
