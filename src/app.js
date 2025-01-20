@@ -39,12 +39,14 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // 根路由
 app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
   const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="zh-CN">
       <head>
         <title>账户商店 API</title>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
           body { 
             font-family: system-ui, -apple-system, sans-serif;
@@ -52,13 +54,35 @@ app.get('/', (req, res) => {
             margin: 0 auto;
             padding: 2rem;
             line-height: 1.6;
+            background: #f9f9f9;
           }
-          h1 { color: #333; }
+          h1 { 
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+          }
           .endpoint {
-            background: #f5f5f5;
-            padding: 1rem;
-            border-radius: 4px;
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
             margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .endpoint h3 {
+            margin: 0 0 1rem 0;
+            color: #2563eb;
+          }
+          .method {
+            background: #2563eb;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+          }
+          .path {
+            color: #333;
+            font-family: monospace;
           }
         </style>
       </head>
@@ -66,16 +90,16 @@ app.get('/', (req, res) => {
         <h1>账户商店 API 文档</h1>
         <p>API 版本：v1.0</p>
         <div class="endpoint">
-          <h3>GET /api</h3>
-          <p>检查 API 状态</p>
+          <h3><span class="method">GET</span><span class="path">/api</span></h3>
+          <p>检查 API 状态和环境变量配置</p>
         </div>
         <div class="endpoint">
-          <h3>GET /api/products</h3>
+          <h3><span class="method">GET</span><span class="path">/api/products</span></h3>
           <p>获取商品列表</p>
         </div>
         <div class="endpoint">
-          <h3>POST /api/admin/register</h3>
-          <p>管理员注册</p>
+          <h3><span class="method">POST</span><span class="path">/api/admin/register</span></h3>
+          <p>管理员注册（需要用户名和密码）</p>
         </div>
       </body>
     </html>
