@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = 'your-jwt-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
 
 // 生成 JWT token
 const generateToken = (user) => {
@@ -11,7 +11,7 @@ const generateToken = (user) => {
       role: user.role
     },
     JWT_SECRET,
-    { expiresIn: '24h' }
+    { expiresIn: '7d' }
   );
 };
 
@@ -20,6 +20,7 @@ const verifyToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
   } catch (err) {
+    console.error('Token verification error:', err);
     return null;
   }
 };

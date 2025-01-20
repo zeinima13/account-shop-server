@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
-const { generateToken } = require('../../utils/auth');
+const { generateToken, verifyToken, JWT_SECRET } = require('../../utils/auth');
 
 const app = express();
 const router = express.Router();
@@ -22,26 +22,45 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://zeinima13:zeinima13@c
 
 // API 状态
 router.get('/', (req, res) => {
-  console.log('API is running');
-  res.json({ message: '账户商店 API 正在运行' });
+  res.json({
+    message: '账户商店 API 正在运行',
+    endpoints: {
+      auth: {
+        register: 'POST /auth/register - 用户注册',
+        login: 'POST /auth/login - 用户登录',
+        createAdmin: 'POST /auth/create-admin - 创建管理员账户'
+      },
+      products: {
+        list: 'GET /products - 获取商品列表',
+        create: 'POST /products - 创建商品 (需要管理员权限)',
+        getOne: 'GET /products/:id - 获取单个商品',
+        update: 'PUT /products/:id - 更新商品 (需要管理员权限)',
+        delete: 'DELETE /products/:id - 删除商品 (需要管理员权限)'
+      },
+      orders: {
+        create: 'POST /orders - 创建订单',
+        list: 'GET /orders - 获取订单列表'
+      }
+    },
+    docs: 'https://github.com/zeinima13/account-shop-server'
+  });
 });
 
 // 认证中间件
 const authenticate = async (req, res, next) => {
   try {
-    console.log('Auth headers:', req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: '未提供认证令牌' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('Token:', token);
-    const decoded = jwt.verify(token, 'your-jwt-secret-key');
-    console.log('Decoded token:', decoded);
-    
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return res.status(401).json({ error: '无效的认证令牌' });
+    }
+
     const user = await User.findById(decoded.id);
-    console.log('Found user:', user);
     if (!user) {
       return res.status(401).json({ error: '用户不存在' });
     }
@@ -50,13 +69,13 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Authentication error:', err);
-    res.status(401).json({ error: '无效的认证令牌' });
+    res.status(401).json({ error: '认证失败' });
   }
 };
 
 // 管理员权限中间件
 const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: '需要管理员权限' });
   }
   next();
@@ -186,7 +205,7 @@ router.post('/products', authenticate, requireAdmin, async (req, res) => {
       stock,
       type,
       status,
-      createdBy: req.user.id
+      createdBy: req.user._id
     });
 
     await product.save();
@@ -286,7 +305,7 @@ router.post('/orders', authenticate, async (req, res) => {
     }
 
     const order = new Order({
-      user: req.user.id,
+      user: req.user._id,
       product: productId,
       price: product.price,
       status: 'pending'
@@ -305,7 +324,7 @@ router.post('/orders', authenticate, async (req, res) => {
 // 获取用户订单
 router.get('/orders', authenticate, async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id })
+    const orders = await Order.find({ user: req.user._id })
       .populate('product')
       .sort('-createdAt');
     res.json(orders);
