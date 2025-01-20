@@ -1,0 +1,9 @@
+.git
+node_modules
+*.log
+.env
+.env.local
+README.md
+uploads/*
+tests
+coverage
