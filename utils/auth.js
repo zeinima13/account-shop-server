@@ -19,37 +19,13 @@ const generateToken = (user) => {
 const verifyToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch (err) {
     return null;
   }
-};
-
-// 从请求头中提取 token
-const extractToken = (event) => {
-  const authHeader = event.headers.authorization || event.headers.Authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  return authHeader.split(' ')[1];
-};
-
-// 验证用户权限中间件
-const authenticate = async (event) => {
-  const token = extractToken(event);
-  if (!token) {
-    throw new Error('未提供认证令牌');
-  }
-
-  const decoded = verifyToken(token);
-  if (!decoded) {
-    throw new Error('无效的认证令牌');
-  }
-
-  return decoded;
 };
 
 module.exports = {
   generateToken,
   verifyToken,
-  authenticate,
-  extractToken,
   JWT_SECRET
 };
