@@ -39,12 +39,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // 根路由
 app.get('/', (req, res) => {
-  res.json({ message: '账户商店 API 正在运行' });
+  res.json({ message: '账户商店 API v1.0 正在运行' });
 });
 
 app.get('/api', (req, res) => {
   res.json({ 
-    message: '账户商店 API 正在运行',
+    message: '账户商店 API v1.0 正在运行',
     env: {
       mongodbUri: process.env.MONGODB_URI ? 'Set' : 'Not set',
       nodeEnv: process.env.NODE_ENV
