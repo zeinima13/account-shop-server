@@ -39,7 +39,48 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // 根路由
 app.get('/', (req, res) => {
-  res.json({ message: '账户商店 API v1.0 正在运行' });
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>账户商店 API</title>
+        <meta charset="utf-8">
+        <style>
+          body { 
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+          }
+          h1 { color: #333; }
+          .endpoint {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>账户商店 API 文档</h1>
+        <p>API 版本：v1.0</p>
+        <div class="endpoint">
+          <h3>GET /api</h3>
+          <p>检查 API 状态</p>
+        </div>
+        <div class="endpoint">
+          <h3>GET /api/products</h3>
+          <p>获取商品列表</p>
+        </div>
+        <div class="endpoint">
+          <h3>POST /api/admin/register</h3>
+          <p>管理员注册</p>
+        </div>
+      </body>
+    </html>
+  `;
+  res.send(html);
 });
 
 app.get('/api', (req, res) => {
