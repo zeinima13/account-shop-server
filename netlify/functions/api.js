@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
-const { generateToken, verifyToken, JWT_SECRET } = require('../../utils/auth');
+
+const JWT_SECRET = 'IDFd+Q5HhhAxM32Q0y6HQnHKaqhiIQXeuMJoU5R+91M=';
+const { generateToken, verifyToken } = require('../../utils/auth');
 
 const app = express();
 const router = express.Router();
