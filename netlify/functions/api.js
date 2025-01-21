@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
-const { generateToken, verifyToken, JWT_SECRET } = require('../../utils/auth');
+
+const JWT_SECRET = 'IDFd+Q5HhhAxM32Q0y6HQnHKaqhiIQXeuMJoU5R+91M=';
 
 const app = express();
 const router = express.Router();
@@ -85,7 +86,16 @@ router.post('/auth/register', async (req, res) => {
 
     await user.save();
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
@@ -119,7 +129,16 @@ router.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
@@ -156,7 +175,16 @@ router.post('/auth/create-admin', async (req, res) => {
 
     await user.save();
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
