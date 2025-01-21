@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key';
+const JWT_SECRET = 'IDFd+Q5HhhAxM32Q0y6HQnHKaqhiIQXeuMJoU5R+91M=';
 
 // 生成 JWT token
 const generateToken = (user) => {
@@ -27,6 +27,5 @@ const verifyToken = (token) => {
 
 module.exports = {
   generateToken,
-  verifyToken,
-  JWT_SECRET
+  verifyToken
 };
