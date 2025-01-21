@@ -24,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://zeinima13:zeinima13@c
 // 认证中间件
 const authenticate = async (req, res, next) => {
   try {
+    console.log('Headers:', req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: '未提供认证令牌' });
@@ -32,21 +33,26 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     console.log('Token:', token);
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Decoded token:', decoded);
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      console.log('Decoded token:', decoded);
 
-    const user = await User.findById(decoded.id);
-    console.log('Found user:', user);
+      const user = await User.findById(decoded.id);
+      console.log('Found user:', user);
 
-    if (!user) {
-      return res.status(401).json({ error: '用户不存在' });
+      if (!user) {
+        return res.status(401).json({ error: '用户不存在' });
+      }
+
+      req.user = user;
+      next();
+    } catch (jwtError) {
+      console.error('JWT verification error:', jwtError);
+      return res.status(401).json({ error: '无效的认证令牌', details: jwtError.message });
     }
-
-    req.user = user;
-    next();
   } catch (err) {
     console.error('Authentication error:', err);
-    res.status(401).json({ error: '无效的认证令牌' });
+    res.status(401).json({ error: '认证失败', details: err.message });
   }
 };
 
