@@ -8,7 +8,6 @@ const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 
 const JWT_SECRET = 'IDFd+Q5HhhAxM32Q0y6HQnHKaqhiIQXeuMJoU5R+91M=';
-const { generateToken, verifyToken } = require('../../utils/auth');
 
 const app = express();
 const router = express.Router();
@@ -21,32 +20,6 @@ app.use(cors());
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://zeinima13:zeinima13@cluster0.xtxwqn1.mongodb.net/account-shop?retryWrites=true&w=majority')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
-
-// API 状态
-router.get('/', (req, res) => {
-  res.json({
-    message: '账户商店 API 正在运行',
-    endpoints: {
-      auth: {
-        register: 'POST /auth/register - 用户注册',
-        login: 'POST /auth/login - 用户登录',
-        createAdmin: 'POST /auth/create-admin - 创建管理员账户'
-      },
-      products: {
-        list: 'GET /products - 获取商品列表',
-        create: 'POST /products - 创建商品 (需要管理员权限)',
-        getOne: 'GET /products/:id - 获取单个商品',
-        update: 'PUT /products/:id - 更新商品 (需要管理员权限)',
-        delete: 'DELETE /products/:id - 删除商品 (需要管理员权限)'
-      },
-      orders: {
-        create: 'POST /orders - 创建订单',
-        list: 'GET /orders - 获取订单列表'
-      }
-    },
-    docs: 'https://github.com/zeinima13/account-shop-server'
-  });
-});
 
 // 认证中间件
 const authenticate = async (req, res, next) => {
@@ -107,7 +80,16 @@ router.post('/auth/register', async (req, res) => {
 
     await user.save();
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
@@ -141,7 +123,16 @@ router.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
@@ -178,7 +169,16 @@ router.post('/auth/create-admin', async (req, res) => {
 
     await user.save();
 
-    const token = generateToken(user);
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        role: user.role
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       token,
       user: {
